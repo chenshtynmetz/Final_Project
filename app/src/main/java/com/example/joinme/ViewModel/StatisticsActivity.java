@@ -19,6 +19,7 @@ import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 
 import com.example.joinme.Model.Category;
+import com.example.joinme.Model.CountCategory;
 import com.example.joinme.Model.api.RetrofitClient;
 import com.example.joinme.R;
 import com.example.joinme.databinding.ActivityStatisticsBinding;
@@ -214,157 +215,108 @@ public class StatisticsActivity extends AppCompatActivity {
     }
 
     private void createPieChart() throws InterruptedException {
-        //send each category to countCategory
-        for(int i=0; i < categories.length; ++i){
-            countCategory(categories[i], colors[i]);
-        }
+        //add data to pie chart
+        Call<ArrayList<CountCategory>> call = RetrofitClient.getInstance().getAPI().countCategories();
+        call.enqueue(new Callback<ArrayList<CountCategory>>() {
+            @Override
+            public void onResponse(Call<ArrayList<CountCategory>> call, Response<ArrayList<CountCategory>> response) {
+                for(int i=0; i<categories.length; i++){
+                    CountCategory curr=response.body().get(i);
+                    pieChart.addPieSlice(
+                            new PieModel(
+                                    curr.getName(),
+                                    curr.getCount(),
+                                    Color.parseColor(colors[i])));
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ArrayList<CountCategory>> call, Throwable t) {
+                Log.d("Fail", t.getMessage());
+            }
+        });
 
         Thread.sleep(3000);
         // To animate the pie chart
         pieChart.startAnimation();
     }
 
-    private void countCategory(String category, String color){
-        /**
-         * for each category, count the number of groups from it and add to the pie chart
-         */
-        //extract from db
-        CollectionReference collection = db.collection("groups");
-        Query query = collection.whereEqualTo("title", category);
-        AggregateQuery countQuery = query.count();
-        countQuery.get(AggregateSource.SERVER).addOnCompleteListener(task -> {
-            if (task.isSuccessful()) {
-                AggregateQuerySnapshot snapshot = task.getResult();
-                Log.d(TAG, "Count: " + snapshot.getCount());
-                //add to pie chart
-                pieChart.addPieSlice(
-                        new PieModel(
-                                category,
-                                snapshot.getCount(),
-                                Color.parseColor(color)));
-            } else {
-                Log.d(TAG, "Count failed: ", task.getException());
+    private void createBarChart() throws InterruptedException {
+        //add data to bar chart
+        Call<ArrayList<ArrayList<CountCategory>>> call = RetrofitClient.getInstance().getAPI().compareHappened();
+        call.enqueue(new Callback<ArrayList<ArrayList<CountCategory>>>() {
+            @Override
+            public void onResponse(Call<ArrayList<ArrayList<CountCategory>>> call, Response<ArrayList<ArrayList<CountCategory>>> response) {
+                ArrayList<CountCategory> total = response.body().get(0);
+                ArrayList<CountCategory> happened = response.body().get(1);
+                for(int i=0; i<total.size(); i++){
+                    barArrayList.add(new BarEntry(i, total.get(i).getCount()));
+                    barArrayList.add(new BarEntry(i, happened.get(i).getCount()));
+                }
+                BarDataSet barDataSet = new BarDataSet(barArrayList, "Compare groups that happened and didn't happen");
+                BarData barData = new BarData(barDataSet);
+                barChart.setData(barData);
+                barChart.invalidate();
+                barDataSet.setColors(Color.BLUE, Color.CYAN, Color.BLUE, Color.CYAN,Color.BLUE, Color.CYAN,Color.BLUE, Color.CYAN,Color.BLUE, Color.CYAN,Color.BLUE, Color.CYAN);
+                barDataSet.setValueTextColor(Color.BLACK);
+                barDataSet.setStackLabels(categories);
+                barDataSet.setValueTextSize(10f);
+
+                //set column names
+                XAxis xAxis = barChart.getXAxis();
+                xAxis.setTextSize(9f);
+                xAxis.setValueFormatter(new ValueFormatter() {
+                    @Override
+                    public String getFormattedValue(float value) {
+                        return total.get((int) value).getName();
+                    }
+                });
+                barChart.getDescription().setEnabled(true);
+            }
+
+            @Override
+            public void onFailure(Call<ArrayList<ArrayList<CountCategory>>> call, Throwable t) {
+                Log.d("Fail", t.getMessage());
             }
         });
-    }
-
-    private void createBarChart() throws InterruptedException {
-        //send to recursive function that creates the bar chart
-        getBarData(0, 0);
-    }
-
-    private void getBarData(int i, int j) throws InterruptedException {
-        if(i == categories.length){//stop condition
-            Log.d(TAG, "bar Count: " + barArrayList.toString());
-            //create bar chart
-            BarDataSet barDataSet = new BarDataSet(barArrayList, "Compare groups that happened and didn't happen");
-            BarData barData = new BarData(barDataSet);
-            barChart.setData(barData);
-            barChart.invalidate();
-            barDataSet.setColors(Color.BLUE, Color.CYAN, Color.BLUE, Color.CYAN,Color.BLUE, Color.CYAN,Color.BLUE, Color.CYAN,Color.BLUE, Color.CYAN,Color.BLUE, Color.CYAN);
-            barDataSet.setValueTextColor(Color.BLACK);
-            barDataSet.setStackLabels(categories);
-            barDataSet.setValueTextSize(10f);
-
-            //set column names
-            XAxis xAxis = barChart.getXAxis();
-            xAxis.setTextSize(9f);
-            xAxis.setValueFormatter(new ValueFormatter() {
-                @Override
-                public String getFormattedValue(float value) {
-                    return categories[(int) value];
-                }
-            });
-            barChart.getDescription().setEnabled(true);
-        }
-        else{
-            CollectionReference collection = db.collection("groups");
-            if(j % 2 == 0){//general
-                //extract from db
-                Query query = collection.whereEqualTo("title", categories[i]);
-                AggregateQuery countQuery = query.count();
-                countQuery.get(AggregateSource.SERVER)
-                        .addOnCompleteListener(task -> {
-                            if (task.isSuccessful()) {
-                                AggregateQuerySnapshot snapshot = task.getResult();
-                                Log.d(TAG, "bar Count: " + snapshot.getCount());
-                                //add to bar chart
-                                barArrayList.add(new BarEntry(i, snapshot.getCount()));
-                                try {
-                                    getBarData(i, j+1);
-                                } catch (InterruptedException e) {
-                                    e.printStackTrace();
-                                }
-                            } else {
-                                Log.d(TAG, "Count failed: ", task.getException());
-                            }
-                        });
-            }else{//happened
-                //extract from db
-                Query query = collection.whereEqualTo("title", categories[i]).whereEqualTo("is_happened", true);
-                AggregateQuery countQuery = query.count();
-                countQuery.get(AggregateSource.SERVER)
-                        .addOnCompleteListener(task -> {
-                            if (task.isSuccessful()) {
-                                AggregateQuerySnapshot snapshot = task.getResult();
-                                Log.d(TAG, "bar Count: " + snapshot.getCount());
-                                //add to bar chart
-                                barArrayList.add(new BarEntry(i, snapshot.getCount()));
-                                try {
-                                    getBarData(i+1, j+1);
-                                } catch (InterruptedException e) {
-                                    e.printStackTrace();
-                                }
-                            } else {
-                                Log.d(TAG, "Count failed: ", task.getException());
-                            }
-                        });
-            }
-        }
     }
 
     private void createHorizontalBarChart() {
         /**
          * takes the number of groups the top 3 users opened and present it in horizontal bar chart
          */
-        //extract from db
-        db.collection("usersById").orderBy("my_groups", Query.Direction.DESCENDING).limit(3).get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            int i=0;
-                            for (QueryDocumentSnapshot document : task.getResult()) {
-                                hBarUsers[i] = document.getString("name");
-                                //add to bar chart
-                                List<String> myGroups = (List<String>)document.get("my_groups");
-                                hBarArrayList.add(new BarEntry(i, myGroups.size()));
-                                Log.d(TAG, document.getId() + " => " + document.getData());
-                                i++;
-                            }
+        Call<ArrayList<CountCategory>> call = RetrofitClient.getInstance().getAPI().getTopUsers();
+        call.enqueue(new Callback<ArrayList<CountCategory>>() {
+            @Override
+            public void onResponse(Call<ArrayList<CountCategory>> call, Response<ArrayList<CountCategory>> response) {
+                for(int i=0; i<3; i++){
+                    CountCategory curr=response.body().get(i);
+                    hBarUsers[i] = curr.getName();
+                    hBarArrayList.add(new BarEntry(i, curr.getCount()));
+                }
+                //create bar chart
+                BarDataSet barDataSet = new BarDataSet(hBarArrayList, "Top 3 users by number of groups the opened");
+                BarData barData = new BarData(barDataSet);
+                barDataSet.setColors(ColorTemplate.COLORFUL_COLORS);
+                barDataSet.setValueTextColor(Color.BLACK);
+                barDataSet.setValueTextSize(10f);
 
-                            //create bar chart
-                            BarDataSet barDataSet = new BarDataSet(hBarArrayList, "Top 3 users by number of groups the opened");
-                            BarData barData = new BarData(barDataSet);
-                            barDataSet.setColors(ColorTemplate.COLORFUL_COLORS);
-                            barDataSet.setValueTextColor(Color.BLACK);
-                            barDataSet.setValueTextSize(10f);
+                //set column names
+                XAxis xAxis = hBarChart.getXAxis();
+                xAxis.setValueFormatter(new com.github.mikephil.charting.formatter.IndexAxisValueFormatter(hBarUsers));
 
-                            //set column names
-                            XAxis xAxis = hBarChart.getXAxis();
-                            xAxis.setValueFormatter(new com.github.mikephil.charting.formatter.IndexAxisValueFormatter(hBarUsers));
+                ArrayList<IBarDataSet> dataSets = new ArrayList<>();
+                dataSets.add(barDataSet);
+                hBarChart.getDescription().setEnabled(true);
 
-                            ArrayList<IBarDataSet> dataSets = new ArrayList<>();
-                            dataSets.add(barDataSet);
-                            hBarChart.getDescription().setEnabled(true);
+                hBarChart.setData(barData);
+                hBarChart.invalidate();
+            }
 
-                            hBarChart.setData(barData);
-                            hBarChart.invalidate();
-
-                        } else {
-                            Log.d(TAG, "Error getting documents: ", task.getException());
-                        }
-                    }
-                });
+            @Override
+            public void onFailure(Call<ArrayList<CountCategory>> call, Throwable t) {
+                Log.d("Fail", t.getMessage());
+            }
+        });
     }
 }
