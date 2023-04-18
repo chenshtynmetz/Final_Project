@@ -50,7 +50,7 @@ public class OpenGroupActivity extends AppCompatActivity implements AdapterView.
     Logic logic = new Logic();
     // create array of Strings of categories
     String[] categories;
-    //view binding
+    //view binding.
     private ActivityOpenGroupBinding binding;
     private GoogleSignInClient mGoogleSignInClient;
     private FirebaseAuth firebaseAuth;
