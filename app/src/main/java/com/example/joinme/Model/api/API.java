@@ -177,5 +177,11 @@ public interface API {
             @Field("uid") String uid
     );
 
+    @FormUrlEncoded
+    @POST("openWhatsappGroup")
+    Call<ResponseBody> openWhatsappGroup(
+            @Field("gid") String gid
+    );
+
 
 }
