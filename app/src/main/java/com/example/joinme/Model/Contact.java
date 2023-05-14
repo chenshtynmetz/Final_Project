@@ -6,14 +6,16 @@ public class Contact {
     private String date;
     private String id;
     private int max_participants;
+    private int min_participants;
     private int num_of_participant;
 
-    public Contact(String category, String location, String date, String id, int max_participants, int num_of_participant) {
+    public Contact(String category, String location, String date, String id, int max_participants, int min_participants, int num_of_participant) {
         this.title = category;
         this.city = location;
         this.date = date;
         this.id = id;
         this.max_participants = max_participants;
+        this.min_participants = min_participants;
         this.num_of_participant = num_of_participant;
     }
 
@@ -62,4 +64,25 @@ public class Contact {
     public int getNum_of_participant() {
         return num_of_participant;
     }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public int getMin_participants() {
+        return min_participants;
+    }
+
+    public void setMin_participants(int min_participants) {
+        this.min_participants = min_participants;
+    }
+
+    public void setNum_of_participant(int num_of_participant) {
+        this.num_of_participant = num_of_participant;
+    }
 }
+

@@ -174,31 +174,48 @@ public class RelevantGroupsActivity extends AppCompatActivity implements Recycle
                     Toast.makeText(RelevantGroupsActivity.this, "Joined group successfully", Toast.LENGTH_SHORT).show();
                     Log.d("Add user to group", "Success");
                     Call<Group> call2 = RetrofitClient.getInstance().getAPI().getGroupDetails(groupID);
-                    call2.enqueue(new Callback<Group>() {
-                        @Override
-                        public void onResponse(Call<Group> call, Response<Group> response) {
-                            Group group = response.body();
-                            String head_id = group.getHead_of_group();
-                            Call<ResponseBody> whatsappCall = RetrofitClient.getInstance().getAPI().openWhatsappGroup(groupID);
-                            whatsappCall.enqueue(new Callback<ResponseBody>() {
-                                @Override
-                                public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-                                    Log.d("done", "done");
-                                }
+                    if(contacts.get(position).getMin_participants() == contacts.get(position).getNum_of_participant()+1){
+                        call2.enqueue(new Callback<Group>() {
+                            @Override
+                            public void onResponse(Call<Group> call, Response<Group> response) {
+                                Group group = response.body();
+                                String head_id = group.getHead_of_group(); //todo: add notification
+                                Call<ResponseBody> whatsappCall = RetrofitClient.getInstance().getAPI().openWhatsappGroup(groupID);
+                                whatsappCall.enqueue(new Callback<ResponseBody>() {
+                                    @Override
+                                    public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                                        Log.d("done", "done");
+                                    }
 
-                                @Override
-                                public void onFailure(Call<ResponseBody> call, Throwable t) {
-                                    Log.d("fail", t.getMessage());
-                                }
-                            });
+                                    @Override
+                                    public void onFailure(Call<ResponseBody> call, Throwable t) {
+                                        Log.d("fail", t.getMessage());
+                                    }
+                                });
 
-                        }
+                            }
 
-                        @Override
-                        public void onFailure(Call<Group> call, Throwable t) {
-                            Log.d("fail", t.getMessage());
-                        }
-                    });
+                            @Override
+                            public void onFailure(Call<Group> call, Throwable t) {
+                                Log.d("fail", t.getMessage());
+                            }
+                        });
+                    }
+                    else if(contacts.get(position).getMin_participants() < contacts.get(position).getNum_of_participant()+1){
+                        Call<ResponseBody> call3 = RetrofitClient.getInstance().getAPI().joinToWhatsappGroup(groupID, firebaseAuth.getUid());
+                        call3.enqueue(new Callback<ResponseBody>() {
+                            @Override
+                            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                                Log.d("join", "you join to whatsapp group");
+                            }
+
+                            @Override
+                            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                                Log.d("fail", t.getMessage());
+                            }
+                        });
+                    }
+
                 } else {
                     Toast.makeText(RelevantGroupsActivity.this, "You are already in this group", Toast.LENGTH_SHORT).show();
                 }

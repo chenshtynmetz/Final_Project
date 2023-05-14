@@ -210,7 +210,7 @@ public class OpenGroupActivity extends AppCompatActivity implements AdapterView.
                 String head_uid = head.getUid();
                 //create group
                 Call<ResponseBody> call = RetrofitClient.getInstance()
-                        .getAPI().addGroup(title,city,time,date,head_uid,min,max);
+                        .getAPI().addGroup(title,city,time,date,head_uid,min,max, "");
                 call.enqueue(new Callback<ResponseBody>() {
                     @Override
                     public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {

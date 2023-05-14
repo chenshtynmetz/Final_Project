@@ -161,7 +161,8 @@ public interface API {
             @Field("date") String date,
             @Field("head_uid") String head_uid,
             @Field("min") int min,
-            @Field("max") int max
+            @Field("max") int max,
+            @Field("wid") String wid
     );
 
     @FormUrlEncoded
@@ -181,6 +182,13 @@ public interface API {
     @POST("openWhatsappGroup")
     Call<ResponseBody> openWhatsappGroup(
             @Field("gid") String gid
+    );
+
+    @FormUrlEncoded
+    @POST("joinToWhatsappGroup")
+    Call<ResponseBody> joinToWhatsappGroup(
+            @Field("gid") String gid,
+            @Field("uid") String uid
     );
 
 

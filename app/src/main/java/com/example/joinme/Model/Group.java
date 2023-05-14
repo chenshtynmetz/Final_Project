@@ -13,6 +13,7 @@ public class Group {
     private boolean is_happened; //the group success?
     private ArrayList<String> participants; //list of all the participants in this group.
     private String head_of_group_uid; //the user that create this group.
+    private String wid;
 
     public Group(){}
 
@@ -27,6 +28,7 @@ public class Group {
         this.head_of_group_uid = head;
         this.min_participants = min_participants;
         this.max_participants = max_participants;
+        this.wid = null;
     }
 
     public Group(String title, String city, String time, String date, String head, int num_of_participant){
