@@ -91,6 +91,11 @@ public interface API {
 
     );
 
+    @GET("trainModel")
+    Call<ResponseBody> trainModel(
+
+    );
+
     @FormUrlEncoded
     @POST("addCategory")
     Call<ResponseBody> addCategory(
@@ -190,6 +195,10 @@ public interface API {
             @Field("gid") String gid,
             @Field("uid") String uid
     );
+
+
+
+
 
 
 }

@@ -73,6 +73,25 @@ public class AdminMainPageActivity extends AppCompatActivity {
                 startActivity(new Intent(AdminMainPageActivity.this, StatisticsActivity.class));
             }
         });
+
+        binding.trainModelBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Call<ResponseBody> call = RetrofitClient.getInstance().getAPI().trainModel();
+                call.enqueue(new Callback<ResponseBody>() {
+                    @Override
+                    public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                        Toast.makeText(AdminMainPageActivity.this, "model trained successfully", Toast.LENGTH_SHORT).show();
+                    }
+
+                    @Override
+                    public void onFailure(Call<ResponseBody> call, Throwable t) {
+                        Toast.makeText(AdminMainPageActivity.this, "model train failed", Toast.LENGTH_SHORT).show();
+                        Log.d("error", t.getMessage());
+                    }
+                });
+            }
+        });
     }
 
     // menu
