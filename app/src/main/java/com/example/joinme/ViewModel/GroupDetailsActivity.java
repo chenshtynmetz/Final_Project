@@ -61,10 +61,18 @@ public class GroupDetailsActivity extends AppCompatActivity {
         binding.backBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(GroupDetailsActivity.this, RelevantGroupsActivity.class);
-                intent.putExtra("Title", title);
-                intent.putExtra("City", "");
-                startActivity(intent);
+                Intent thisIntent = getIntent();
+                if(thisIntent.getStringExtra("from") == "RelevantGroups"){
+                    Intent intent = new Intent(GroupDetailsActivity.this, RelevantGroupsActivity.class);
+                    intent.putExtra("Title", title);
+                    intent.putExtra("City", "");
+                    startActivity(intent);
+                }
+                else{
+                    Intent intent = new Intent(GroupDetailsActivity.this, GroupSuggestionActivity.class);
+                    intent.putExtra("Title", thisIntent.getStringExtra("Title"));
+                    startActivity(intent);
+                }
 
                 finish();
             }

@@ -96,6 +96,11 @@ public interface API {
 
     );
 
+    @GET("getRelatedGroups")
+    Call<ArrayList<Contact>> getRelatedGroups(
+            @Query("title") String title
+    );
+
     @FormUrlEncoded
     @POST("addCategory")
     Call<ResponseBody> addCategory(
