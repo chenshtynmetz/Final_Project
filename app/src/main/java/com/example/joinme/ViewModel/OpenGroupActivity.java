@@ -152,6 +152,12 @@ public class OpenGroupActivity extends AppCompatActivity implements AdapterView.
                     timePicker.show();
             }
         });
+        binding.cityTxt.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(OpenGroupActivity.this, MapsActivity.class));
+            }
+        });
         //when create button clicks
         binding.CreateBtn.setOnClickListener(new View.OnClickListener(){
             @Override
