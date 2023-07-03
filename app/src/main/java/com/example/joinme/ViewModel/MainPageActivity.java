@@ -58,7 +58,7 @@ public class MainPageActivity extends AppCompatActivity {
             //open group button
             @Override
             public void onClick(View view) {
-                startActivity(new Intent(MainPageActivity.this, OpenGroupActivity.class));
+                startActivity(new Intent(MainPageActivity.this, MapsActivity.class));
                 finish();
             }
         });

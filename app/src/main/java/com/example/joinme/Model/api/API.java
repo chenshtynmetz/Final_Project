@@ -167,6 +167,7 @@ public interface API {
     Call<ResponseBody> addGroup(
             @Field("title") String title,
             @Field("city") String city,
+            @Field("address") String address,
             @Field("time") String time,
             @Field("date") String date,
             @Field("head_uid") String head_uid,

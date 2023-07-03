@@ -152,18 +152,27 @@ public class OpenGroupActivity extends AppCompatActivity implements AdapterView.
                     timePicker.show();
             }
         });
-        binding.cityTxt.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                startActivity(new Intent(OpenGroupActivity.this, MapsActivity.class));
-            }
-        });
+        Intent intent = getIntent();
+        String address = intent.getStringExtra("Address");
+        binding.cityTxt.setText(address);
+
+//        binding.cityTxt.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                startActivity(new Intent(OpenGroupActivity.this, MapsActivity.class));
+//                Intent intent = getIntent();
+//                String address = intent.getStringExtra("Address");
+//                binding.cityTxt.setText(address);
+//            }
+//        });
         //when create button clicks
         binding.CreateBtn.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view) {
                 //get all the details
-                String city = binding.cityTxt.getText().toString();
+                Intent intent = getIntent();
+                String address = intent.getStringExtra("Address");
+                String city = intent.getStringExtra("City");
                 String time = binding.SelectTimeEdt.getText().toString();
                 String date = binding.selectDateEt.getText().toString();
 
@@ -216,7 +225,7 @@ public class OpenGroupActivity extends AppCompatActivity implements AdapterView.
                 String head_uid = head.getUid();
                 //create group
                 Call<ResponseBody> call = RetrofitClient.getInstance()
-                        .getAPI().addGroup(title,city,time,date,head_uid,min,max, "");
+                        .getAPI().addGroup(title,city, address,time,date,head_uid,min,max, "");
                 call.enqueue(new Callback<ResponseBody>() {
                     @Override
                     public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {

@@ -8,6 +8,7 @@ public class Group {
     private int max_participants; //maximum participant that the group need.
     private int num_of_participant; //the number of participants in this group.
     private String city; //the location in this group. maybe add street and number, or change to location.
+    private String address;
     private String time; //the time of this meeting
     private String date; // the date of this meeting
     private boolean is_happened; //the group success?
@@ -17,10 +18,11 @@ public class Group {
 
     public Group(){}
 
-    public Group(String title, String city, String time, String date, String head, int min_participants, int max_participants) {
+    public Group(String title, String city, String address, String time, String date, String head, int min_participants, int max_participants) {
         this.title = title;
         this.num_of_participant = 0;
         this.city = city;
+        this.address = address;
         this.time = time;
         this.date = date;
         this.is_happened = false;
@@ -31,10 +33,11 @@ public class Group {
         this.wid = null;
     }
 
-    public Group(String title, String city, String time, String date, String head, int num_of_participant){
+    public Group(String title, String city,String address, String time, String date, String head, int num_of_participant){
         this.title = title;
         this.num_of_participant = num_of_participant;
         this.city = city;
+        this.address = address;
         this.time = time;
         this.date = date;
         this.is_happened = false;
@@ -128,5 +131,29 @@ public class Group {
     public void addParticipant(String uid){
         this.participants.add(uid);
         this.num_of_participant += 1;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public String getHead_of_group_uid() {
+        return head_of_group_uid;
+    }
+
+    public void setHead_of_group_uid(String head_of_group_uid) {
+        this.head_of_group_uid = head_of_group_uid;
+    }
+
+    public String getWid() {
+        return wid;
+    }
+
+    public void setWid(String wid) {
+        this.wid = wid;
     }
 }
