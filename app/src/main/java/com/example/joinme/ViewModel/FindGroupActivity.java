@@ -94,7 +94,7 @@ public class FindGroupActivity extends AppCompatActivity implements AdapterView.
             }
         });
 
-        //when create button clicks
+        //when search button clicks
         binding.searchBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -111,13 +111,38 @@ public class FindGroupActivity extends AppCompatActivity implements AdapterView.
                 String city = binding.cityTxt.getText().toString();
                 Intent intent = new Intent(FindGroupActivity.this, RelevantGroupsActivity.class);
                 intent.putExtra("Title", title);
-                intent.putExtra("City", city);
+                intent.putExtra("City", city); //todo: cancel it
                 startActivity(intent);
              
                 finish();
             }
         });
+
+        binding.searchMapBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                //user must choose a category
+                if(title.equals("Category")){
+                    TextView errorText = (TextView)binding.spinner.getSelectedView();
+                    errorText.setError("");
+                    errorText.setTextColor(Color.RED);//just to highlight that this is an error
+                    errorText.setText("Choose category");//changes the selected item text to this
+                    return;
+                }
+
+                //get all the details
+                String city = binding.cityTxt.getText().toString();
+                Intent intent = new Intent(FindGroupActivity.this, SearchOnMapActivity.class);
+                intent.putExtra("Title", title);
+//                intent.putExtra("City", city);
+                startActivity(intent);
+
+                finish();
+            }
+        });
     }
+
+
 
     // menu
     @Override

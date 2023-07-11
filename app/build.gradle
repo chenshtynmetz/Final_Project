@@ -11,6 +11,10 @@ android {
     namespace 'com.example.joinme'
     compileSdk 32
 
+    dataBinding{
+        enabled=true
+    }
+
     defaultConfig {
         applicationId "com.example.joinme"
         minSdk 19

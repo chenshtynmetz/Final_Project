@@ -3,15 +3,17 @@ package com.example.joinme.Model;
 public class Contact {
     private String title;
     private String city;
+    private String address;
     private String date;
     private String id;
     private int max_participants;
     private int min_participants;
     private int num_of_participant;
 
-    public Contact(String category, String location, String date, String id, int max_participants, int min_participants, int num_of_participant) {
+    public Contact(String category, String location, String address, String date, String id, int max_participants, int min_participants, int num_of_participant) {
         this.title = category;
         this.city = location;
+        this.address = address;
         this.date = date;
         this.id = id;
         this.max_participants = max_participants;
@@ -83,6 +85,14 @@ public class Contact {
 
     public void setNum_of_participant(int num_of_participant) {
         this.num_of_participant = num_of_participant;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
     }
 }
 

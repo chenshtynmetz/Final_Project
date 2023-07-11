@@ -68,6 +68,11 @@ public class GroupDetailsActivity extends AppCompatActivity {
                     intent.putExtra("City", "");
                     startActivity(intent);
                 }
+                else if(thisIntent.getStringExtra("from") == "map"){
+                    Intent intent = new Intent(GroupDetailsActivity.this, SearchOnMapActivity.class);
+                    intent.putExtra("Title", title);
+                    startActivity(intent);
+                }
                 else{
                     Intent intent = new Intent(GroupDetailsActivity.this, GroupSuggestionActivity.class);
                     intent.putExtra("Title", thisIntent.getStringExtra("Title"));
@@ -118,7 +123,7 @@ public class GroupDetailsActivity extends AppCompatActivity {
             public void onResponse(Call<Group> call, Response<Group> response) {
                 binding.titleTxt.setText(response.body().getTitle());
                 title = response.body().getTitle();
-                binding.addressTxt.setText(response.body().getCity());
+                binding.addressTxt.setText(response.body().getAddress());
                 binding.dateTxt.setText(response.body().getDate());
                 binding.timeTxt.setText(response.body().getTime());
                 binding.numPartTxt.setText("Current number of participants in the group: " + response.body().getNum_of_participant());

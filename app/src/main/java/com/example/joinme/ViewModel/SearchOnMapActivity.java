@@ -1,5 +1,6 @@
 package com.example.joinme.ViewModel;
 
+import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Context;
 import android.content.Intent;
@@ -7,12 +8,10 @@ import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -27,12 +26,13 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import com.example.joinme.Model.Category;
+import com.example.joinme.Model.Contact;
 import com.example.joinme.Model.api.RetrofitClient;
 import com.example.joinme.R;
 //import com.example.joinme.databinding.ActivityMainPageBinding;
 //import com.example.joinme.databinding.ActivityMapsBinding;
-import com.example.joinme.databinding.ActivityDeleteUserBinding;
 import com.example.joinme.databinding.ActivityMapsBinding;
+import com.example.joinme.databinding.ActivitySearchOnMapBinding;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -49,6 +49,7 @@ import com.google.android.gms.maps.GoogleMap.OnMapLongClickListener;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
+import com.google.firebase.firestore.GeoPoint;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -60,7 +61,9 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, OnMapClickListener {
+import android.os.Bundle;
+
+public class SearchOnMapActivity extends AppCompatActivity implements OnMapReadyCallback, OnMapClickListener {
     private GoogleMap mMap;
     private static final String TAG = MapsActivity.class.getSimpleName();
     private  boolean locationPermissionGranted;
@@ -74,28 +77,29 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     // not granted.
     private final LatLng defaultLocation = new LatLng(-33.8523341, 151.2106085);
     private static final int DEFAULT_ZOOM = 15;
-    private ActivityMapsBinding binding;
+    private ActivitySearchOnMapBinding binding;
     androidx.constraintlayout.widget.ConstraintLayout parent;
     // creating a variable
     // for search view.
     SearchView searchView;
-
-
+    String[] addressArr;
+    String[] groupsIdArr;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         //The LayoutInflater takes an XML file as input and builds the View objects from it.
-        binding = ActivityMapsBinding.inflate(getLayoutInflater());
+        binding = ActivitySearchOnMapBinding.inflate(getLayoutInflater());
         //Set the activity content to an explicit view. This view is placed directly into the activity's view hierarchy
         setContentView(binding.getRoot());
-        parent = findViewById(R.id.mapPage);
+        parent = findViewById(R.id.searchMapPage);
         // initializing our search view.
-        searchView = findViewById(R.id.idSearchView);
+        searchView = findViewById(R.id.searchMapView);
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map);
+                .findFragmentById(R.id.Searchmap);
         mapFragment.getMapAsync(this);
+//        mapFragment.getMapAsync(this);
         // adding on query listener for our search view.
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
@@ -111,7 +115,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 // checking if the entered location is null or not.
                 if (location != null || location.equals("")) {
                     // on below line we are creating and initializing a geo coder.
-                    Geocoder geocoder = new Geocoder(MapsActivity.this);
+                    Geocoder geocoder = new Geocoder(SearchOnMapActivity.this);
                     try {
                         // on below line we are getting location from the
                         // location name and adding that location to address list.
@@ -138,11 +142,34 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 return false;
             }
         });
-        // at last we calling our map fragment to update.
-        mapFragment.getMapAsync(this);
+
+
     }
 
+    public LatLng getLocationFromAddress(Context context,String strAddress) {
 
+        Geocoder coder = new Geocoder(context);
+        List<Address> address;
+        LatLng p1 = null;
+
+        try {
+            address = coder.getFromLocationName(strAddress, 5);
+            if (address == null) {
+                return null;
+            }
+            Address location = address.get(0);
+            location.getLatitude();
+            location.getLongitude();
+
+            p1 = new LatLng(location.getLatitude(), location.getLongitude() );
+
+        } catch (Exception ex) {
+
+            ex.printStackTrace();
+        }
+
+        return p1;
+    }
 
     /**
      * Manipulates the map once available.
@@ -163,10 +190,54 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         updateLocationUI();
         // Get the current location of the device and set the position of the map.
         getDeviceLocation();
+        Intent intent = getIntent();
+        String title = intent.getStringExtra("Title");
+        Call<ArrayList<Contact>> call = RetrofitClient.getInstance().getAPI().getGroups(title);
+        call.enqueue(new Callback<ArrayList<Contact>>() { //todo: this not work. the array dont update in time. need to check if is pass to the details page when click on the marker and after add join button in details page.
+            @Override
+            public void onResponse(Call<ArrayList<Contact>> call, Response<ArrayList<Contact>> response) {
+                addressArr = new String[response.body().size()];
+                groupsIdArr = new String[response.body().size()];
+                for(int i = 0; i < response.body().size(); i++){
+                    addressArr[i] = response.body().get(i).getAddress();
+                    groupsIdArr[i] = response.body().get(i).getId();
+                    //  String address = response.body().get(i).getAddress();
+//                    LatLng pos = getLocationFromAddress(getApplicationContext(),address);
+//                    Marker marker = mMap.addMarker(new MarkerOptions().position(pos));
+//                    marker.setTag(response.body().get(i).getId());
+//                    mMap.setOnMarkerClickListener(this);
 
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ArrayList<Contact>> call, Throwable t) {
+                Log.d("Fail", t.getMessage());
+            }
+        });
+        for(int i=0; i<addressArr.length; i++){
+            LatLng pos = getLocationFromAddress(getApplicationContext(),addressArr[i]);
+            Marker marker = mMap.addMarker(new MarkerOptions().position(pos));
+            marker.setTag(groupsIdArr[i]);
+//            mMap.setOnMarkerClickListener(this);
+        }
+        // at last we calling our map fragment to update.
+//        mapFragment.getMapAsync(this);
         this.mMap.setOnMapClickListener(this);
     }
+    public boolean onMarkerClick(final Marker marker) {
 
+        String gid = marker.getTag().toString();
+        Intent intent = new Intent(SearchOnMapActivity.this, GroupDetailsActivity.class);
+        intent.putExtra("ID", gid);
+        intent.putExtra("from", "map");
+        startActivity(intent);
+
+        // Return false to indicate that we have not consumed the event and that we wish
+        // for the default behavior to occur (which is for the camera to move such that the
+        // marker is centered and for the marker's info window to open, if it has one).
+        return false;
+    }
     private void getLocationPermission() {
         /*
          * Request location permission, so that we can get the location of the
@@ -260,26 +331,25 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     public void onMapClick(LatLng point) {
-        Marker marker = mMap.addMarker(new MarkerOptions()
-                .position(point).draggable(true));
+//        Marker marker = mMap.addMarker(new MarkerOptions()
+//                .position(point).draggable(true)
 //                .title("my new group"));
-        LatLng pos = marker.getPosition();
-        Geocoder geocoder;
-        List<Address> addresses;
-        geocoder = new Geocoder(this, Locale.getDefault());
-
-        try {
-            addresses = geocoder.getFromLocation(pos.latitude, pos.longitude, 1); // Here 1 represent max location result to returned, by documents it recommended 1 to 5
-            String address = addresses.get(0).getAddressLine(0);
-            String city = addresses.get(0).getLocality();
-            onButtonShowPopupWindowClick(address, city, marker);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+//        LatLng pos = marker.getPosition();
+//        Geocoder geocoder;
+//        List<Address> addresses;
+//        geocoder = new Geocoder(this, Locale.getDefault());
+//
+//        try {
+//            addresses = geocoder.getFromLocation(pos.latitude, pos.longitude, 1); // Here 1 represent max location result to returned, by documents it recommended 1 to 5
+//            String address = addresses.get(0).getAddressLine(0);
+//            String city = addresses.get(0).getLocality();
+//            onButtonShowPopupWindowClick(address, city, marker);
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
 
 
     }
-
 
     public void onButtonShowPopupWindowClick(String address, String city, Marker marker) {
         // inflate the layout of the popup window
@@ -313,7 +383,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                  */
                 popupWindow.dismiss();
                 Log.d(TAG, "yes");
-                Intent intent = new Intent(MapsActivity.this, OpenGroupActivity.class);
+                Intent intent = new Intent(SearchOnMapActivity.this, OpenGroupActivity.class);
                 intent.putExtra("Address", address);
                 intent.putExtra("City", city);
                 startActivity(intent);
@@ -334,4 +404,3 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     }
 }
-
