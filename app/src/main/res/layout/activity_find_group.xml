@@ -22,19 +22,6 @@
         app:layout_constraintVertical_bias="0.045"
         tools:text="Back" />
 
-    <EditText
-        android:id="@+id/cityTxt"
-        android:layout_width="183dp"
-        android:layout_height="43dp"
-        android:ems="10"
-        android:hint="City"
-        android:inputType="textPersonName"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.421" />
-
     <TextView
         android:id="@+id/searchGroupTxt"
         android:layout_width="183dp"
@@ -66,11 +53,13 @@
         android:id="@+id/searchBtn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="140dp"
         android:text="Search"
         android:textAllCaps="false"
         android:textSize="16sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/cityTxt"
         app:layout_constraintVertical_bias="0.573" />
@@ -79,12 +68,13 @@
         android:id="@+id/searchMapBtn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="76dp"
         android:text="Search In Map"
         android:textAllCaps="false"
         android:textSize="16sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.501"
+        app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/cityTxt"
         app:layout_constraintVertical_bias="0.779" />

@@ -112,7 +112,6 @@ public class RelevantGroupsActivity extends AppCompatActivity implements Recycle
     private void setUpContact(){
         Intent intent = getIntent();
         String title = intent.getStringExtra("Title");
-        String city = intent.getStringExtra("City");
         String [] today = new String[3];
 
         //if true it means the device running the app has Android SDK 26 or up
@@ -121,39 +120,19 @@ public class RelevantGroupsActivity extends AppCompatActivity implements Recycle
             today = java.time.LocalDate.now().toString().split("-");
             Log.d(TAG, "the date is: " + Arrays.toString(today));
         }
+        String[] finalToday = today;
+        Call<ArrayList<Contact>> call = RetrofitClient.getInstance().getAPI().getGroups(title);
+        call.enqueue(new Callback<ArrayList<Contact>>() {
+            @Override
+            public void onResponse(Call<ArrayList<Contact>> call, Response<ArrayList<Contact>> response) {
+                presentRelevantGroups(response.body(), finalToday);
+            }
 
-
-        //the conditions of if and else are designed to create a choice - whether to insert the name of the city or not
-        if(city.equals("")) {
-            String[] finalToday = today;
-            Call<ArrayList<Contact>> call = RetrofitClient.getInstance().getAPI().getGroups(title);
-            call.enqueue(new Callback<ArrayList<Contact>>() {
-                @Override
-                public void onResponse(Call<ArrayList<Contact>> call, Response<ArrayList<Contact>> response) {
-                    presentRelevantGroups(response.body(), finalToday);
-                }
-
-                @Override
-                public void onFailure(Call<ArrayList<Contact>> call, Throwable t) {
-                    Log.d("Relevant groups", "fail");
-                }
-            });
-        }
-        else{
-            String[] finalToday1 = today;
-            Call<ArrayList<Contact>> call = RetrofitClient.getInstance().getAPI().getGroupsCity(title, city);
-            call.enqueue(new Callback<ArrayList<Contact>>() {
-                @Override
-                public void onResponse(Call<ArrayList<Contact>> call, Response<ArrayList<Contact>> response) {
-                    presentRelevantGroups(response.body(), finalToday1);
-                }
-
-                @Override
-                public void onFailure(Call<ArrayList<Contact>> call, Throwable t) {
-                    Log.d("Relevant groups", "fail");
-                }
-            });
-        }
+            @Override
+            public void onFailure(Call<ArrayList<Contact>> call, Throwable t) {
+                Log.d("Relevant groups", "fail");
+            }
+        });
     }
 
     @Override

@@ -117,6 +117,9 @@ public class GroupSuggestionActivity extends AppCompatActivity implements Recycl
             @Override
             public void onResponse(Call<ArrayList<Contact>> call, Response<ArrayList<Contact>> response) {
                 Log.d( "/////",response.body().toString());
+//                if(response.body().isEmpty()){
+//                    startActivity(new Intent(GroupSuggestionActivity.this, MainPageActivity.class));
+//                }
                 presentRelevantGroups(response.body(), finalToday);
             }
 
@@ -238,6 +241,7 @@ public class GroupSuggestionActivity extends AppCompatActivity implements Recycl
         }
 
         if(contacts.isEmpty()){
+//            startActivity(new Intent(GroupSuggestionActivity.this, MainPageActivity.class));
             nonResultTxt.setText("No matching groups were found");
         }
 

@@ -28,6 +28,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
 
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -39,6 +40,8 @@ public class GroupDetailsActivity extends AppCompatActivity {
     private static final int RC_SIGN_IN = 100;              //Request code used to invoke sign in user interactions.
     private static final String TAG = "GOOGLE_SIGN_IN_TAG";
     public String title;
+    public int min_participants;
+    public int num_of_participant;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,13 +65,14 @@ public class GroupDetailsActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent thisIntent = getIntent();
-                if(thisIntent.getStringExtra("from") == "RelevantGroups"){
+                String from = thisIntent.getStringExtra("from");
+                if(from.equals("RelevantGroups")){
                     Intent intent = new Intent(GroupDetailsActivity.this, RelevantGroupsActivity.class);
                     intent.putExtra("Title", title);
                     intent.putExtra("City", "");
                     startActivity(intent);
                 }
-                else if(thisIntent.getStringExtra("from") == "map"){
+                else if(from.equals("Map")){
                     Intent intent = new Intent(GroupDetailsActivity.this, SearchOnMapActivity.class);
                     intent.putExtra("Title", title);
                     startActivity(intent);
@@ -80,6 +84,75 @@ public class GroupDetailsActivity extends AppCompatActivity {
                 }
 
                 finish();
+            }
+        });
+
+        binding.joinbttn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String groupID = id;
+                Call<ResponseBody> call = RetrofitClient.getInstance().getAPI().addUserToGroup(groupID, firebaseAuth.getUid());
+                call.enqueue(new Callback<ResponseBody>() {
+                    @Override
+                    public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                        if (response.code() == 200) {
+                            Toast.makeText(GroupDetailsActivity.this, "Joined group successfully", Toast.LENGTH_SHORT).show();
+                            Log.d("Add user to group", "Success");
+                            Call<Group> call2 = RetrofitClient.getInstance().getAPI().getGroupDetails(groupID);
+                            if(min_participants == num_of_participant+1){
+                                call2.enqueue(new Callback<Group>() {
+                                    @Override
+                                    public void onResponse(Call<Group> call, Response<Group> response) {
+                                        Group group = response.body();
+                                        String head_id = group.getHead_of_group();
+                                        Call<ResponseBody> whatsappCall = RetrofitClient.getInstance().getAPI().openWhatsappGroup(groupID);
+                                        whatsappCall.enqueue(new Callback<ResponseBody>() {
+                                            @Override
+                                            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                                                Log.d("done", "done");
+                                            }
+
+                                            @Override
+                                            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                                                Log.d("fail", t.getMessage());
+                                            }
+                                        });
+
+                                    }
+
+                                    @Override
+                                    public void onFailure(Call<Group> call, Throwable t) {
+                                        Log.d("fail", t.getMessage());
+                                    }
+                                });
+                            }
+                            else if(min_participants < num_of_participant+1) {
+                                Call<ResponseBody> call3 = RetrofitClient.getInstance().getAPI().joinToWhatsappGroup(groupID, firebaseAuth.getUid());
+                                call3.enqueue(new Callback<ResponseBody>() {
+                                    @Override
+                                    public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                                        Log.d("join", "you join to whatsapp group");
+                                    }
+
+                                    @Override
+                                    public void onFailure(Call<ResponseBody> call, Throwable t) {
+                                        Log.d("fail", t.getMessage());
+                                    }
+                                });
+                            }
+                            Intent intent = new Intent(GroupDetailsActivity.this, GroupSuggestionActivity.class);
+                            intent.putExtra("Title", title);
+                            startActivity(intent);
+                        } else {
+                            Toast.makeText(GroupDetailsActivity.this, "You are already in this group", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<ResponseBody> call, Throwable t) {
+                        Log.d("Add user to group", "Fail");
+                    }
+                });
             }
         });
     }
@@ -128,6 +201,8 @@ public class GroupDetailsActivity extends AppCompatActivity {
                 binding.timeTxt.setText(response.body().getTime());
                 binding.numPartTxt.setText("Current number of participants in the group: " + response.body().getNum_of_participant());
                 binding.headTxt.setText("The head of the group is:\n " + response.body().getHead_of_group());
+                min_participants = response.body().getMin_participants();
+                num_of_participant = response.body().getNum_of_participant();
             }
 
             @Override
@@ -136,4 +211,6 @@ public class GroupDetailsActivity extends AppCompatActivity {
             }
         });
     }
+
+
 }

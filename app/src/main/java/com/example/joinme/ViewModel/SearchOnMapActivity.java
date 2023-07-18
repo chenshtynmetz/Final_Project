@@ -62,8 +62,9 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 import android.os.Bundle;
+import android.widget.Toast;
 
-public class SearchOnMapActivity extends AppCompatActivity implements OnMapReadyCallback, OnMapClickListener {
+public class SearchOnMapActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener {
     private GoogleMap mMap;
     private static final String TAG = MapsActivity.class.getSimpleName();
     private  boolean locationPermissionGranted;
@@ -186,27 +187,23 @@ public class SearchOnMapActivity extends AppCompatActivity implements OnMapReady
         mMap = googleMap;
         UiSettings setting = this.mMap.getUiSettings();
         setting.setZoomControlsEnabled(true);
-        // Turn on the My Location layer and the related control on the map.
-        updateLocationUI();
-        // Get the current location of the device and set the position of the map.
-        getDeviceLocation();
         Intent intent = getIntent();
         String title = intent.getStringExtra("Title");
         Call<ArrayList<Contact>> call = RetrofitClient.getInstance().getAPI().getGroups(title);
-        call.enqueue(new Callback<ArrayList<Contact>>() { //todo: this not work. the array dont update in time. need to check if is pass to the details page when click on the marker and after add join button in details page.
+        call.enqueue(new Callback<ArrayList<Contact>>() {
             @Override
             public void onResponse(Call<ArrayList<Contact>> call, Response<ArrayList<Contact>> response) {
                 addressArr = new String[response.body().size()];
                 groupsIdArr = new String[response.body().size()];
-                for(int i = 0; i < response.body().size(); i++){
+                for(int i = 0; i < response.body().size(); i++) {
                     addressArr[i] = response.body().get(i).getAddress();
                     groupsIdArr[i] = response.body().get(i).getId();
-                    //  String address = response.body().get(i).getAddress();
-//                    LatLng pos = getLocationFromAddress(getApplicationContext(),address);
-//                    Marker marker = mMap.addMarker(new MarkerOptions().position(pos));
-//                    marker.setTag(response.body().get(i).getId());
-//                    mMap.setOnMarkerClickListener(this);
-
+                }
+                for(int i=0; i<addressArr.length; i++){
+                    LatLng pos = getLocationFromAddress(getApplicationContext(),addressArr[i]);
+                    Marker marker = mMap.addMarker(new MarkerOptions().position(pos));
+                    marker.setTitle(response.body().get(i).getDate());
+                    marker.setTag("0"+groupsIdArr[i]);
                 }
             }
 
@@ -215,22 +212,29 @@ public class SearchOnMapActivity extends AppCompatActivity implements OnMapReady
                 Log.d("Fail", t.getMessage());
             }
         });
-        for(int i=0; i<addressArr.length; i++){
-            LatLng pos = getLocationFromAddress(getApplicationContext(),addressArr[i]);
-            Marker marker = mMap.addMarker(new MarkerOptions().position(pos));
-            marker.setTag(groupsIdArr[i]);
-//            mMap.setOnMarkerClickListener(this);
-        }
+        this.mMap.setOnMarkerClickListener(this);
+        // Turn on the My Location layer and the related control on the map.
+        updateLocationUI();
+        // Get the current location of the device and set the position of the map.
+        getDeviceLocation();
         // at last we calling our map fragment to update.
 //        mapFragment.getMapAsync(this);
-        this.mMap.setOnMapClickListener(this);
+//        this.mMap.setOnMapClickListener(this);
     }
     public boolean onMarkerClick(final Marker marker) {
-
-        String gid = marker.getTag().toString();
+        String tag = marker.getTag().toString();
+        String gid = "";
+        if(tag.charAt(0) == '0'){
+            String newTag = "1" + tag.substring(1);
+            marker.setTag(newTag);
+            return false;
+        }
+        else if(tag.charAt(0) == '1'){
+            gid = tag.substring(1);
+        }
         Intent intent = new Intent(SearchOnMapActivity.this, GroupDetailsActivity.class);
         intent.putExtra("ID", gid);
-        intent.putExtra("from", "map");
+        intent.putExtra("from", "Map");
         startActivity(intent);
 
         // Return false to indicate that we have not consumed the event and that we wish
@@ -329,78 +333,6 @@ public class SearchOnMapActivity extends AppCompatActivity implements OnMapReady
         }
     }
 
-    @Override
-    public void onMapClick(LatLng point) {
-//        Marker marker = mMap.addMarker(new MarkerOptions()
-//                .position(point).draggable(true)
-//                .title("my new group"));
-//        LatLng pos = marker.getPosition();
-//        Geocoder geocoder;
-//        List<Address> addresses;
-//        geocoder = new Geocoder(this, Locale.getDefault());
-//
-//        try {
-//            addresses = geocoder.getFromLocation(pos.latitude, pos.longitude, 1); // Here 1 represent max location result to returned, by documents it recommended 1 to 5
-//            String address = addresses.get(0).getAddressLine(0);
-//            String city = addresses.get(0).getLocality();
-//            onButtonShowPopupWindowClick(address, city, marker);
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
 
 
     }
-
-    public void onButtonShowPopupWindowClick(String address, String city, Marker marker) {
-        // inflate the layout of the popup window
-        LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
-        //Inflate a new view hierarchy from the specified xml resource.
-        View popupView = inflater.inflate(R.layout.choose_location_popup, null);
-
-        //confirm the deletion of the user
-        TextView tvMsg = popupView.findViewById(R.id.msgTxt);
-        Button yesBtn = popupView.findViewById(R.id.yesBtn);
-        Button noBtn = popupView.findViewById(R.id.noBtn);
-        tvMsg.setText("you choose the location " + address);
-
-        // create the popup window
-        int width = LinearLayout.LayoutParams.WRAP_CONTENT;
-        int height = LinearLayout.LayoutParams.WRAP_CONTENT;
-        boolean focusable = true; // lets taps outside the popup also dismiss it
-
-        //This class represents a popup window that can be used to display an arbitrary view.
-        //The popup window is a floating container that appears on top of the current activity.
-        final PopupWindow popupWindow = new PopupWindow(popupView, width, height, focusable);
-
-        // show the popup window
-        // which view you pass in doesn't matter, it is only used for the window token
-        popupWindow.showAtLocation(parent, Gravity.CENTER, 0, 0);
-        yesBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                /**
-                 * If we click Yes in the window, the user enters the collection of the blocked users
-                 */
-                popupWindow.dismiss();
-                Log.d(TAG, "yes");
-                Intent intent = new Intent(SearchOnMapActivity.this, OpenGroupActivity.class);
-                intent.putExtra("Address", address);
-                intent.putExtra("City", city);
-                startActivity(intent);
-            }
-        });
-
-        noBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                /**
-                 * If we click in the window no, the window will close
-                 */
-                Log.d(TAG, "no");
-                popupWindow.dismiss();
-                marker.remove();
-            }
-        });
-
-    }
-}

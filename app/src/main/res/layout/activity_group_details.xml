@@ -105,6 +105,20 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.967" />
 
+    <Button
+        android:id="@+id/joinbttn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Join"
+        android:textAllCaps="false"
+        android:textSize="16sp"
+        app:layout_constraintBottom_toTopOf="@+id/addressTxt"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.38" />
+
     <!--    <TextView-->
 <!--        android:id="@+id/numPartTxt"-->
 <!--        android:layout_width="249dp"-->

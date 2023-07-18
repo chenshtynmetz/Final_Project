@@ -108,10 +108,8 @@ public class FindGroupActivity extends AppCompatActivity implements AdapterView.
                 }
 
                 //get all the details
-                String city = binding.cityTxt.getText().toString();
                 Intent intent = new Intent(FindGroupActivity.this, RelevantGroupsActivity.class);
                 intent.putExtra("Title", title);
-                intent.putExtra("City", city); //todo: cancel it
                 startActivity(intent);
              
                 finish();
@@ -131,10 +129,8 @@ public class FindGroupActivity extends AppCompatActivity implements AdapterView.
                 }
 
                 //get all the details
-                String city = binding.cityTxt.getText().toString();
                 Intent intent = new Intent(FindGroupActivity.this, SearchOnMapActivity.class);
                 intent.putExtra("Title", title);
-//                intent.putExtra("City", city);
                 startActivity(intent);
 
                 finish();
