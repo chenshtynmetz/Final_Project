@@ -19,27 +19,21 @@
 https://github.com/chenshtynmetz/JoinMeServer
 
 ## Introduction:
-As part of a software engineering course, we conduct a development simulation, which includes most of the stages of the software life cycle, including experiencing teamwork and creating objects characteristic of each stage.
+As part of this final project, we conduct a development simulation, which includes most of the stages of the software life cycle, including experiencing teamwork and creating objects characteristic of each stage.
 
 
 ## Evaluation components and project content:
 • An organized and orderly Git repository that includes the course products (documents), explanations and the code.
 
-• Treatment of two types of users who receive services or work with the system in a different role/manner.
+• Treatment of two types of users who receive services or work with the system in a different role/manner (user and admin).
 
-• Implementation of 2-3 central implementation processes that work from end to end (depending on the size of the group).
+• Organization of central logic in an application server (Node.js) that can be invented On a local computer.
 
-• Organization of central logic in an application server (Django/Flask, net.ASP, js.Node) that can be invented On a local computer or in the cloud - you can also use functions cloud Firebase or any infrastructure Serverless otherwise.
+• Using Firebase database.
 
-• Using any database (for example Firebase, MySQL, SQL MS, etc.).
+• Regarding a display component (Android): implementation of dialog, menu and switching to another device component (camera/phone/messages, etc.)
 
-• Regarding a display component (Android): implementation of at least 3 of the following: notifications, sensors, screen ,dialog, menu, broadcast, switching to another device component (camera/phone/messages, etc.)
-
-• Regarding the display (Internet, Windows):) Use of templates from the MV* family
-
-• The display must look professional and include human engineering as taught in the course (you can use the templates available online).
-
-• The system must be designed (structural design) based on accepted templates (layers, microservices, clean code)
+• Regarding the display (Internet, Windows): Use of MVVM template on the client side and MVC on the server side.
 
 
 ## The project's description:
@@ -78,6 +72,16 @@ Youth and adults who want to connect with a group of people.
      - Displaying statistics
      
      - View a history of all created groups
+  
+## Interesting features:
+### Machine Learning:
+In order to suggest groups that our user would be interested in we implemented association rule machine learning algorithm (apriory) in python.
+
+### Map:
+We used google maps API in order to present a map and the user's and the activities' accurate location.
+
+### WhatsApp:
+Whenever an activity is created a whatsapp group will be opened for the activitie's participants (using whatsapp-web.js API).
 
 
 ## The actual system structure:
